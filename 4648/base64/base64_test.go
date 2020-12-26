@@ -4,7 +4,7 @@ import "testing"
 
 func Test_getBitsFromString(t *testing.T) {
 	s := "Ola"
-	// Ola em binary
+	// Ola in binary
 	expected := []uint8{0, 1, 0, 0, 1, 1, 1, 1, 0, 1, 1, 0, 1, 1, 0, 0, 0, 1, 1, 0, 0, 0, 0, 1}
 	bits := getBitsFromString(s)
 	if len(bits) != len(expected) {
@@ -95,5 +95,20 @@ func Test_getIdxFromAlphabet(t *testing.T) {
 	idx := getIdxFromAlphabet(c)
 	if idx != expected {
 		t.Fatal("Returning wrong index")
+	}
+}
+
+func Test_DecodeString(t *testing.T) {
+	str := "this is my string that i will encode"
+	encodedString := EncodeString(str)
+	decodedString := DecodeString(encodedString)
+	if decodedString != str {
+		t.Fatal("Decoded string differs")
+	}
+	str = "In programming, Base64 is a group of binary-to-text encoding schemes that represent binary data (more specifically a sequence of 8-bit bytes) in an ASCII string format by translating it into a radix-64 representation."
+	encodedString = EncodeString(str)
+	decodedString = DecodeString(encodedString)
+	if decodedString != str {
+		t.Fatalf("Decoded string differs %v", decodedString)
 	}
 }
