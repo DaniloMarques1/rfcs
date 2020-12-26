@@ -1,4 +1,4 @@
-package main
+package base64
 
 import (
 	"math"
@@ -13,17 +13,17 @@ var alphabet = []string{"A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "
 
 // return a uint8 slice with all the bits from
 // the string
-func GetBitsFromString(chars string) []uint8 {
+func getBitsFromString(chars string) []uint8 {
 	var bits []uint8
 	for _, c := range chars {
-		bits = append(bits, getBitsFromChar(uint8(c), 8)...)
+		bits = append(bits, getBitsSlice(uint8(c), 8)...)
 	}
 
 	return bits
 }
 
-// returns the 8 bits of a char
-func getBitsFromChar(char uint8, size int) []uint8 {
+// returns the (size) bits of a char(int)
+func getBitsSlice(char uint8, size int) []uint8 {
 	var bits []uint8
 	for char > 0 {
 		rest := char % 2
@@ -45,6 +45,7 @@ func fillingBitsSlice(n int, slice []uint8) []uint8 {
 	for len(slice) < n {
 		slice = append(slice, 0)
 	}
+
 	return slice
 }
 
@@ -56,7 +57,7 @@ func getFromTheAlphabet(idx int) string {
 
 // returns the decimal rperesentation of the 6
 // bits received that will be used as index in the alphabet
-func GetIntFromBits(bits []uint8) int {
+func getIntFromBits(bits []uint8) int {
 	start := 0
 	end := float64(len(bits) - 1)
 	var res float64
@@ -69,7 +70,7 @@ func GetIntFromBits(bits []uint8) int {
 	return int(res)
 }
 
-func EncodeBits(bits []uint8) string {
+func encodeBits(bits []uint8) string {
 	rounds := len(bits) / 6 // how many times will be able to get 6 bits
 	start := 0
 	end := start + 6
@@ -77,7 +78,7 @@ func EncodeBits(bits []uint8) string {
 	var encodeString string
 	for rounds > 0 {
 		sliceBits := bits[start:end]
-		idx := GetIntFromBits(sliceBits)
+		idx := getIntFromBits(sliceBits)
 		encodeString += getFromTheAlphabet(idx)
 		rounds--
 		start = end
@@ -92,7 +93,7 @@ func EncodeBits(bits []uint8) string {
 			sliceBits = append(sliceBits, 0)
 			paddings++
 		}
-		idx := GetIntFromBits(sliceBits)
+		idx := getIntFromBits(sliceBits)
 		encodeString += getFromTheAlphabet(idx)
 		for paddings > 0 {
 			encodeString += getFromTheAlphabet(64)
@@ -131,22 +132,22 @@ func removePadding(str string) string {
 // receiveis a string and return the string
 // encoded in base64
 func EncodeString(str string) string {
-	bits := GetBitsFromString(str)
-	encodedString := EncodeBits(bits)
+	bits := getBitsFromString(str)
+	encodedString := encodeBits(bits)
 	return encodedString
 }
 
 // reads the bits received in blocks of 8
 // decoding the int resulted from the bits
 // using the ascii
-func DecodeBits(bits []uint8) string {
+func decodeBits(bits []uint8) string {
 	start := 0
 	end := start + 8
 	rounds := len(bits) / 8
 	var str string
 	for rounds > 0 {
 		sliceBits := bits[start:end]
-		b := GetIntFromBits(sliceBits)
+		b := getIntFromBits(sliceBits)
 		str += string(byte(b))
 		rounds--
 		start = end
@@ -163,8 +164,8 @@ func DecodeString(encodedString string) string {
 	var bits []uint8
 	for _, c := range encodedString {
 		idx := uint8(getIdxFromAlphabet(string(c)))
-		bits = append(bits, getBitsFromChar(idx, 6)...)
+		bits = append(bits, getBitsSlice(idx, 6)...)
 	}
-	decodedString := DecodeBits(bits)
+	decodedString := decodeBits(bits)
 	return decodedString
 }

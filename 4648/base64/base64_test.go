@@ -1,12 +1,12 @@
-package main
+package base64
 
 import "testing"
 
-func Test_GetBitsFromString(t *testing.T) {
+func Test_getBitsFromString(t *testing.T) {
 	s := "Ola"
 	// Ola em binary
 	expected := []uint8{0, 1, 0, 0, 1, 1, 1, 1, 0, 1, 1, 0, 1, 1, 0, 0, 0, 1, 1, 0, 0, 0, 0, 1}
-	bits := GetBitsFromString(s)
+	bits := getBitsFromString(s)
 	if len(bits) != len(expected) {
 		t.Fatal("Invalid bits returned")
 	}
@@ -18,7 +18,7 @@ func Test_GetBitsFromString(t *testing.T) {
 	// Danilo marques in binary
 	expected = []uint8{0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 1, 0, 0, 0, 0, 1, 0, 1, 1, 0, 1, 1, 1, 0, 0, 1, 1, 0, 1, 0, 0, 1, 0, 1, 1, 0, 1, 1, 0, 0, 0, 1, 1, 0, 1, 1, 1, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 1, 0, 1, 1, 0, 1, 0, 1, 1, 0, 0, 0, 0, 1, 0, 1, 1, 1, 0, 0, 1, 0, 0, 1, 1, 1, 0, 0, 0, 1, 0, 1, 1, 1, 0, 1, 0, 1, 0, 1, 1, 0, 0, 1, 0, 1, 0, 1, 1, 1, 0, 0, 1, 1}
 	s = "Danilo marques"
-	bits = GetBitsFromString(s)
+	bits = getBitsFromString(s)
 	if len(bits) != len(expected) {
 		t.Fatal("Invalid bits returned. Lengths differ")
 	}
@@ -31,15 +31,15 @@ func Test_GetBitsFromString(t *testing.T) {
 
 func Test_GetIntFromBits(t *testing.T) {
 	bits := []uint8{0, 1, 0, 0, 0, 1}
-	idx1 := GetIntFromBits(bits)
+	idx1 := getIntFromBits(bits)
 	bits = []uint8{0, 1, 0, 1, 1, 0}
-	idx2 := GetIntFromBits(bits)
+	idx2 := getIntFromBits(bits)
 	bits = []uint8{1, 0, 0, 1, 0, 0}
-	idx3 := GetIntFromBits(bits)
+	idx3 := getIntFromBits(bits)
 	bits = []uint8{1, 1, 1, 1, 1, 1, 1, 1}
-	idx4 := GetIntFromBits(bits)
+	idx4 := getIntFromBits(bits)
 	bits = []uint8{1, 0, 0, 0, 0, 0, 0, 0}
-	idx5 := GetIntFromBits(bits)
+	idx5 := getIntFromBits(bits)
 	if idx1 != 17 || idx2 != 22 || idx3 != 36 || idx4 != 255 || idx5 != 128 {
 		t.Fatal("Wrong integer returned from the six bits group")
 	}
