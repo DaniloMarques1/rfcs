@@ -13,40 +13,37 @@ var alphabet = []string{"A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "
 
 // return a uint8 slice with all the bits from
 // the string
-func getBitsFromString(chars string) []uint8 {
+func getBitsFromString(str string) []uint8 {
 	var bits []uint8
-	for _, c := range chars {
+	for _, c := range str {
 		bits = append(bits, getBitsSlice(uint8(c), 8)...)
 	}
 
 	return bits
 }
 
-// returns the (size) bits of a char(int)
-func getBitsSlice(char uint8, size int) []uint8 {
-	var bits []uint8
-	for char > 0 {
-		rest := char % 2
-		bits = append(bits, rest)
-		res := char / 2
-		char = res
-	}
-	bits = fillingBitsSlice(size, bits)
-
-	var retBits []uint8
-	for i := len(bits) - 1; i >= 0; i-- {
-		retBits = append(retBits, bits[i])
+// returns the bits of the value passed
+// with (size) bits
+func getBitsSlice(value uint8, size int) []uint8 {
+	var bits = make([]uint8, size)
+	idx := size - 1
+	for value > 0 {
+		rest := value % 2
+		bits[idx] = rest
+		value /= 2
+		idx--
 	}
 
-	return retBits
+	fillingBitsSlice(&bits, size)
+
+	return bits
 }
 
-func fillingBitsSlice(n int, slice []uint8) []uint8 {
-	for len(slice) < n {
-		slice = append(slice, 0)
+// adds zeros to fill the required slice size
+func fillingBitsSlice(slice *[]uint8, size int) {
+	for len(*slice) < size {
+		*slice = append(*slice, 0)
 	}
-
-	return slice
 }
 
 // return the correct char that must be
@@ -70,38 +67,37 @@ func getIntFromBits(bits []uint8) int {
 	return int(res)
 }
 
+// takes the string bits and encode the six bits block
+// using the base64 alphabet, returned a encodedString
 func encodeBits(bits []uint8) string {
-	rounds := len(bits) / 6 // how many times will be able to get 6 bits
+	rest := len(bits) % 6 // if rest > 0 then it needs to be add a padding
+	paddingsAdded := 0
+	for rest > 0 {
+		bits = append(bits, 0)
+		rest = len(bits) % 6
+		paddingsAdded++ // if we added two 0s, we need one =, 4 zeros, ==
+	}
+
+	rounds := len(bits) / 6 // how many 6 bits blocks does bits has
 	start := 0
 	end := start + 6
-
-	var encodeString string
+	var encodedString string
 	for rounds > 0 {
 		sliceBits := bits[start:end]
-		idx := getIntFromBits(sliceBits)
-		encodeString += getFromTheAlphabet(idx)
+		idxInAlphabet := getIntFromBits(sliceBits)
+		encodedString += getFromTheAlphabet(idxInAlphabet)
 		rounds--
 		start = end
 		end = start + 6
 	}
-	rest := len(bits) % 6 // shows the last block bits, if the last block does not have 6 bits.
-	if rest > 0 {
-		sliceBits := bits[start:]
-		paddings := 0
-		// adding padding
-		for len(sliceBits) < 6 {
-			sliceBits = append(sliceBits, 0)
-			paddings++
-		}
-		idx := getIntFromBits(sliceBits)
-		encodeString += getFromTheAlphabet(idx)
-		for paddings > 0 {
-			encodeString += getFromTheAlphabet(64)
-			paddings -= 2
-		}
+
+	// adding the 64 char, aka padding
+	for paddingsAdded > 0 {
+		encodedString += getFromTheAlphabet(64)
+		paddingsAdded -= 2
 	}
 
-	return encodeString
+	return encodedString
 }
 
 // return the index of the str in the base64

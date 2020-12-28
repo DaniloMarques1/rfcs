@@ -10,7 +10,7 @@ func Test_getBitsFromString(t *testing.T) {
 	if len(bits) != len(expected) {
 		t.Fatal("Invalid bits returned")
 	}
-	for i, _ := range bits {
+	for i := range bits {
 		if bits[i] != expected[i] {
 			t.Fatal("Invalid bits returned")
 		}
@@ -22,7 +22,7 @@ func Test_getBitsFromString(t *testing.T) {
 	if len(bits) != len(expected) {
 		t.Fatal("Invalid bits returned. Lengths differ")
 	}
-	for i, _ := range bits {
+	for i := range bits {
 		if bits[i] != expected[i] {
 			t.Fatalf("Invalid bits returned. %v, %v", bits[i], expected[i])
 		}
@@ -99,14 +99,23 @@ func Test_getIdxFromAlphabet(t *testing.T) {
 }
 
 func Test_DecodeString(t *testing.T) {
-	str := "this is my string that i will encode"
+	//str := "this is my string that i will encode"
+	str := "Ei"
 	encodedString := EncodeString(str)
 	decodedString := DecodeString(encodedString)
 	if decodedString != str {
 		t.Fatal("Decoded string differs")
 	}
+
 	str = "In programming, Base64 is a group of binary-to-text encoding schemes that represent binary data (more specifically a sequence of 8-bit bytes) in an ASCII string format by translating it into a radix-64 representation."
 	encodedString = EncodeString(str)
+	decodedString = DecodeString(encodedString)
+	if decodedString != str {
+		t.Fatalf("Decoded string differs %v", decodedString)
+	}
+
+	str = "Testing this very nice function"
+	encodedString = "VGVzdGluZyB0aGlzIHZlcnkgbmljZSBmdW5jdGlvbg=="
 	decodedString = DecodeString(encodedString)
 	if decodedString != str {
 		t.Fatalf("Decoded string differs %v", decodedString)
