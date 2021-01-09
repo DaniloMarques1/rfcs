@@ -1,4 +1,4 @@
-package main
+package jwt
 
 import (
 	"crypto/hmac"
@@ -62,7 +62,6 @@ func Verify(token, privateKey string) (map[string]interface{}, error) {
 		fmt.Printf("Error decoding payload %v", err)
 		return nil, err
 	}
-	fmt.Println(string(payload))
 	payloadMap := make(map[string]interface{})
 	err = json.Unmarshal(payload, &payloadMap)
 	if err != nil {
@@ -91,11 +90,3 @@ func signPayloadAndHeader(encodedHeader, encodedPayload, privateKey string) stri
 	return base64.RawURLEncoding.EncodeToString(h.Sum(nil))
 }
 
-func main() {
-	payload := make(map[string]interface{})
-	payload["id"] = 123
-	secret := "secret"
-	token := Sign(payload, secret)
-	fmt.Println(token)
-	Verify(token, secret)
-}
