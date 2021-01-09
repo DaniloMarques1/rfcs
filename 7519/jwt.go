@@ -52,7 +52,11 @@ func Sign(payload map[string]interface{}, secret string) string {
 
 // checks if token is valid, if so returns a map with the payload
 func Verify(token, privateKey string) (map[string]interface{}, error) {
-	splitedToken := strings.Split(token, ".")
+	splitedToken, err := getSplittedToken(token)
+	if err != nil {
+		fmt.Printf("Token error: %v", err)
+                return nil, err
+        }
 	payload, err := base64.RawURLEncoding.DecodeString(splitedToken[1])
 	if err != nil {
 		fmt.Printf("Error decoding payload %v", err)
@@ -67,6 +71,14 @@ func Verify(token, privateKey string) (map[string]interface{}, error) {
 	}
 
 	return payloadMap, nil
+}
+
+func getSplittedToken(token string) ([]string, error) {
+	splittedToken := strings.Split(token, ".")
+	if len(splittedToken) != 3 {
+		return nil, fmt.Errorf("Invlaid token\n")
+	}
+	return splittedToken, nil
 }
 
 // will sign the token header and paylaod using the given privatekey
