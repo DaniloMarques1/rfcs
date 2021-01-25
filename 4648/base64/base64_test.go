@@ -50,7 +50,7 @@ func Test_GetFromTheAlphabet(t *testing.T) {
 	ret2 := getFromTheAlphabet(17) // R
 	ret3 := getFromTheAlphabet(33) // h
 	ret4 := getFromTheAlphabet(63) // /
-	if ret1 != "A" || ret2 != "R" || ret3 != "h" || ret4 != "/" {
+	if ret1 != 'A' || ret2 != 'R' || ret3 != 'h' || ret4 != '/' {
 		t.Fatal("Returned the wrong encode")
 	}
 }
@@ -58,13 +58,13 @@ func Test_GetFromTheAlphabet(t *testing.T) {
 func Test_EncodeString(t *testing.T) {
 	stringToBeEncoded := "Danilo Marques"
 	expected := "RGFuaWxvIE1hcnF1ZXM="
-	result := EncodeString(stringToBeEncoded)
+	result := encodeString(stringToBeEncoded)
 	if expected != result {
 		t.Fatal("Encode returned a wrong encoded string")
 	}
 	stringToBeEncoded = "Ticking away the moments that make up a dull day Fritter and waste the hours in an offhand way. Kicking around on a piece of ground in your home town Waiting for someone or something to show you the way."
 	expected = "VGlja2luZyBhd2F5IHRoZSBtb21lbnRzIHRoYXQgbWFrZSB1cCBhIGR1bGwgZGF5IEZyaXR0ZXIgYW5kIHdhc3RlIHRoZSBob3VycyBpbiBhbiBvZmZoYW5kIHdheS4gS2lja2luZyBhcm91bmQgb24gYSBwaWVjZSBvZiBncm91bmQgaW4geW91ciBob21lIHRvd24gV2FpdGluZyBmb3Igc29tZW9uZSBvciBzb21ldGhpbmcgdG8gc2hvdyB5b3UgdGhlIHdheS4="
-	result = EncodeString(stringToBeEncoded)
+	result = encodeString(stringToBeEncoded)
 	if expected != result {
 		t.Fatalf("Encode returned a wrong encoded string\n%v\n", result)
 	}
@@ -74,7 +74,7 @@ You are young and life is long and there is time to kill today.
 And then one day you find ten years have got behind you.
 No one told you when to run, you missed the starting gun.`
 	expected = `VGlyZWQgb2YgbHlpbmcgaW4gdGhlIHN1bnNoaW5lIHN0YXlpbmcgaG9tZSB0byB3YXRjaCB0aGUgcmFpbi4KWW91IGFyZSB5b3VuZyBhbmQgbGlmZSBpcyBsb25nIGFuZCB0aGVyZSBpcyB0aW1lIHRvIGtpbGwgdG9kYXkuCkFuZCB0aGVuIG9uZSBkYXkgeW91IGZpbmQgdGVuIHllYXJzIGhhdmUgZ290IGJlaGluZCB5b3UuCk5vIG9uZSB0b2xkIHlvdSB3aGVuIHRvIHJ1biwgeW91IG1pc3NlZCB0aGUgc3RhcnRpbmcgZ3VuLg==`
-	result = EncodeString(stringToBeEncoded)
+	result = encodeString(stringToBeEncoded)
 	if expected != result {
 		t.Fatalf("Encode returned a wrong encoded string\n%v\n", result)
 	}
@@ -90,7 +90,7 @@ func Test_removePadding(t *testing.T) {
 }
 
 func Test_getIdxFromAlphabet(t *testing.T) {
-	c := "C"
+	c := 'C'
 	expected := 2
 	idx := getIdxFromAlphabet(c)
 	if idx != expected {
@@ -101,22 +101,22 @@ func Test_getIdxFromAlphabet(t *testing.T) {
 func Test_DecodeString(t *testing.T) {
 	//str := "this is my string that i will encode"
 	str := "Ei"
-	encodedString := EncodeString(str)
-	decodedString := DecodeString(encodedString)
+	encodedString := encodeString(str)
+	decodedString := decodeString(encodedString)
 	if decodedString != str {
 		t.Fatal("Decoded string differs")
 	}
 
 	str = "In programming, Base64 is a group of binary-to-text encoding schemes that represent binary data (more specifically a sequence of 8-bit bytes) in an ASCII string format by translating it into a radix-64 representation."
-	encodedString = EncodeString(str)
-	decodedString = DecodeString(encodedString)
+	encodedString = encodeString(str)
+	decodedString = decodeString(encodedString)
 	if decodedString != str {
 		t.Fatalf("Decoded string differs %v", decodedString)
 	}
 
 	str = "Testing this very nice function"
 	encodedString = "VGVzdGluZyB0aGlzIHZlcnkgbmljZSBmdW5jdGlvbg=="
-	decodedString = DecodeString(encodedString)
+	decodedString = decodeString(encodedString)
 	if decodedString != str {
 		t.Fatalf("Decoded string differs %v", decodedString)
 	}

@@ -4,12 +4,10 @@ import (
 	"math"
 )
 
-var alphabet = []string{"A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L",
-	"M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X",
-	"Y", "Z", "a", "b", "c", "d", "e", "f", "g", "h", "i", "j",
-	"k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v",
-	"w", "x", "y", "z", "0", "1", "2", "3", "4", "5", "6", "7",
-	"8", "9", "+", "/", "="}
+const alphabetBase = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/="
+const alphabetUrl  = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_="
+
+var alphabet string
 
 // return a uint8 slice with all the bits from
 // the string
@@ -34,21 +32,24 @@ func getBitsSlice(value uint8, size int) []uint8 {
 		idx--
 	}
 
-	fillingBitsSlice(&bits, size)
+	bits = fillingBitsSlice(bits, size)
 
 	return bits
 }
 
 // adds zeros to fill the required slice size
-func fillingBitsSlice(slice *[]uint8, size int) {
-	for len(*slice) < size {
-		*slice = append(*slice, 0)
+// and return the slice with newer values added
+func fillingBitsSlice(slice []uint8, size int) []uint8 {
+	for len(slice) < size {
+		slice = append(slice, 0)
 	}
+
+	return slice
 }
 
 // return the correct char that must be
 // used to encode using the alphabet
-func getFromTheAlphabet(idx int) string {
+func getFromTheAlphabet(idx int) byte {
 	return alphabet[idx]
 }
 
@@ -85,7 +86,7 @@ func encodeBits(bits []uint8) string {
 	for rounds > 0 {
 		sliceBits := bits[start:end]
 		idxInAlphabet := getIntFromBits(sliceBits)
-		encodedString += getFromTheAlphabet(idxInAlphabet)
+		encodedString += string(getFromTheAlphabet(idxInAlphabet))
 		rounds--
 		start = end
 		end = start + 6
@@ -93,7 +94,7 @@ func encodeBits(bits []uint8) string {
 
 	// adding the 64 char, aka padding
 	for paddingsAdded > 0 {
-		encodedString += getFromTheAlphabet(64)
+		encodedString += string(getFromTheAlphabet(64))
 		paddingsAdded -= 2
 	}
 
@@ -102,9 +103,9 @@ func encodeBits(bits []uint8) string {
 
 // return the index of the str in the base64
 // alphabet
-func getIdxFromAlphabet(str string) int {
+func getIdxFromAlphabet(char rune) int {
 	for idx, v := range alphabet {
-		if v == str {
+		if v == char {
 			return idx
 		}
 	}
@@ -127,7 +128,7 @@ func removePadding(str string) string {
 
 // receiveis a string and return the string
 // encoded in base64
-func EncodeString(str string) string {
+func encodeString(str string) string {
 	bits := getBitsFromString(str)
 	encodedString := encodeBits(bits)
 	return encodedString
@@ -155,13 +156,38 @@ func decodeBits(bits []uint8) string {
 
 // receives a base64 encoded string and return the
 // ascii representation of it
-func DecodeString(encodedString string) string {
+func decodeString(encodedString string) string {
 	encodedString = removePadding(encodedString)
 	var bits []uint8
 	for _, c := range encodedString {
-		idx := uint8(getIdxFromAlphabet(string(c)))
+		idx := uint8(getIdxFromAlphabet(c))
 		bits = append(bits, getBitsSlice(idx, 6)...)
 	}
 	decodedString := decodeBits(bits)
 	return decodedString
+}
+
+// encode a string using the base64 alphabet
+func StdEncodeString(str string) string {
+	alphabet = alphabetBase
+	return encodeString(str)
+}
+
+// encode a string using the base64url slphabet
+// as defined in the rfc 4648
+func UrlEncodeString(str string) string {
+	alphabet = alphabetUrl
+	return encodeString(str)
+}
+
+// decoding a base64 encoded string
+func StdDecodeString(str string) string {
+	alphabet = alphabetBase
+	return decodeString(str)
+}
+
+// decoding a url safe encoded string
+func UrlDecodeString(str string) string {
+	alphabet = alphabetUrl
+	return decodeString(str)
 }
