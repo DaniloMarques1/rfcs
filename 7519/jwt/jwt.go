@@ -24,7 +24,6 @@ type Jwt struct {
 
 //  Will create token following jwt's requirements
 func Sign(payload map[string]interface{}, secret string) string {
-	// TODO add exp time claim
 	var jwt Jwt
 	// default header values
 	jwt.Header.Typ = "JWT"
@@ -57,14 +56,18 @@ func Verify(token, privateKey string) (map[string]interface{}, error) {
 		fmt.Printf("Token error: %v", err)
                 return nil, err
         }
+	if signature := signPayloadAndHeader(splitedToken[0], splitedToken[1], privateKey); signature != splitedToken[2] {
+		return nil, fmt.Errorf("Invalid signature")
+	}
+
 	payload, err := base64.RawURLEncoding.DecodeString(splitedToken[1])
 	if err != nil {
 		fmt.Printf("Error decoding payload %v", err)
 		return nil, err
 	}
+
 	payloadMap := make(map[string]interface{})
-	err = json.Unmarshal(payload, &payloadMap)
-	if err != nil {
+	if err := json.Unmarshal(payload, &payloadMap); err != nil {
 		fmt.Printf("Error decoding payload %v", err)
 		return nil, err
 	}

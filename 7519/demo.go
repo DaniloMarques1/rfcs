@@ -13,7 +13,7 @@ func main() {
 	fmt.Println(token)
 	payloadToken, err := jwt.Verify(token, secret) // returns a map (payload)
 	if err != nil {
-		fmt.Println("error verifying token")
+		fmt.Println(err)
 		return
 	}
 	fmt.Println(payloadToken)
