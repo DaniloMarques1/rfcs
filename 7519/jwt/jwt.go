@@ -6,7 +6,6 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
-	"os"
 	"strings"
 	"time"
 )
@@ -22,8 +21,9 @@ type Jwt struct {
 	Signature string
 }
 
-//  Will create token following jwt's requirements
-func Sign(payload map[string]interface{}, secret string) string {
+// Will create token following jwt's requirements and return
+// the string representing the token and any possible errors
+func Sign(payload map[string]interface{}, secret string) (string, error) {
 	var jwt Jwt
 	// default header values
 	jwt.Header.Typ = "JWT"
@@ -31,22 +31,21 @@ func Sign(payload map[string]interface{}, secret string) string {
 	jwt.Payload = payload
 	marshedHeader, err := json.Marshal(&jwt.Header)
 	if err != nil {
-		fmt.Printf("Error %v \n", err)
-		os.Exit(-1)
+		return "", err
 	}
 	encodedHeader := base64.RawURLEncoding.EncodeToString([]byte(marshedHeader)) // first part
 
 	jwt.Payload["iat"] = time.Now().Unix()
 	marshedPayload, err := json.Marshal(&jwt.Payload)
 	if err != nil {
-		fmt.Printf("Error %v \n", err)
-		os.Exit(-1)
+		return "", err
 	}
 	encodedPayload := base64.RawURLEncoding.EncodeToString([]byte(marshedPayload)) // second part
 
 	jwt.Signature = signPayloadAndHeader(encodedHeader, encodedPayload, secret) // third part
 	token := fmt.Sprintf("%s.%s.%s", encodedHeader, encodedPayload, jwt.Signature)
-	return token
+
+	return token, nil
 }
 
 // checks if token is valid, if so returns a map with the payload
@@ -54,8 +53,8 @@ func Verify(token, privateKey string) (map[string]interface{}, error) {
 	splitedToken, err := getSplittedToken(token)
 	if err != nil {
 		fmt.Printf("Token error: %v", err)
-                return nil, err
-        }
+		return nil, err
+	}
 	if signature := signPayloadAndHeader(splitedToken[0], splitedToken[1], privateKey); signature != splitedToken[2] {
 		return nil, fmt.Errorf("Invalid signature")
 	}
@@ -75,10 +74,12 @@ func Verify(token, privateKey string) (map[string]interface{}, error) {
 	return payloadMap, nil
 }
 
+// receives a string (token) and returns a slice with len 3
+// where slice[0] = header slice[1] = payload and slice[2] = signature
 func getSplittedToken(token string) ([]string, error) {
 	splittedToken := strings.Split(token, ".")
 	if len(splittedToken) != 3 {
-		return nil, fmt.Errorf("Invlaid token\n")
+		return nil, fmt.Errorf("Invlaid token format\n")
 	}
 	return splittedToken, nil
 }
@@ -86,10 +87,8 @@ func getSplittedToken(token string) ([]string, error) {
 // will sign the token header and paylaod using the given privatekey
 // and the hmac sha256 algorithm, returning the base64url encoded signed string
 func signPayloadAndHeader(encodedHeader, encodedPayload, privateKey string) string {
-	//privateKey = base64.RawURLEncoding.EncodeToString([]byte(privateKey))
-	h := hmac.New(sha256.New, []byte(privateKey))
+	hash := hmac.New(sha256.New, []byte(privateKey))
 	concat := fmt.Sprintf("%s.%s", encodedHeader, encodedPayload)
-	h.Write([]byte(concat))
-	return base64.RawURLEncoding.EncodeToString(h.Sum(nil))
+	hash.Write([]byte(concat))
+	return base64.RawURLEncoding.EncodeToString(hash.Sum(nil))
 }
-
